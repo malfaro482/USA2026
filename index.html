@@ -81,6 +81,8 @@ main{padding:28px 32px;max-width:1440px;margin:0 auto;}
 }
 .team-card{
   background:var(--surface);
+  pointer-events:auto;
+  user-select:none;
   border:1px solid var(--border);
   border-radius:var(--radius);
   padding:16px 12px 14px;
@@ -100,6 +102,7 @@ main{padding:28px 32px;max-width:1440px;margin:0 auto;}
   box-shadow:0 8px 32px rgba(201,162,39,.15);
 }
 .team-card:hover::before{opacity:1}
+.card-flag,.card-name,.card-conf{pointer-events:none;}
 .card-flag{
   width:72px;height:48px;
   border-radius:6px;overflow:hidden;
@@ -1362,6 +1365,34 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
+
+/* Final reliable selection-card binding: keeps Selecciones cards clickable after layout/CSS changes. */
+function bindSelectionCardClicks() {
+  document.querySelectorAll('.team-card').forEach(function(card) {
+    const nameEl = card.querySelector('.card-name');
+    const teamName = (card.getAttribute('data-team') || (nameEl ? nameEl.textContent : '') || '').trim();
+    if(!teamName) return;
+    card.setAttribute('data-team', teamName);
+    card.setAttribute('tabindex', '0');
+    card.style.cursor = 'pointer';
+    card.onclick = function(ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      openTeam(teamName);
+      return false;
+    };
+    card.onkeydown = function(ev) {
+      if(ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        openTeam(teamName);
+      }
+    };
+  });
+}
+bindSelectionCardClicks();
+document.addEventListener('DOMContentLoaded', bindSelectionCardClicks);
+setTimeout(bindSelectionCardClicks, 0);
+setTimeout(bindSelectionCardClicks, 300);
 </script>
 </body>
 </html>
