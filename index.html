@@ -1206,7 +1206,7 @@ const FLAG_CODES_MAP = {"Alemania": "de", "Arabia Saudita": "sa", "Argelia": "dz
 let ptsSortCol = 'pts'; // 'pts' or 'avg'
 let ptsSortAsc = false; // false = highest first
 
-function cleanTeamName(name) { return String(name || "").replace(/\s*\([^)]*\)\s* g, "").trim(); }
+function cleanTeamName(name) { return String(name || "").replace(/\s*\([^)]*\)\s*/g, "").trim(); }
 
 function flagUrl2(name) {
   const code = FLAG_CODES_MAP[name];
