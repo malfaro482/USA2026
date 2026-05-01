@@ -1394,5 +1394,89 @@ document.addEventListener('DOMContentLoaded', bindSelectionCardClicks);
 setTimeout(bindSelectionCardClicks, 0);
 setTimeout(bindSelectionCardClicks, 300);
 </script>
+
+<!-- FORCE FIX: selection cards open team detail -->
+<script>
+(function(){
+  function normalizeName(s){ return (s || '').replace(/\s+/g,' ').trim(); }
+  function getTeamFromCard(card){
+    if(!card) return '';
+    return normalizeName(card.getAttribute('data-team') || (card.querySelector('.card-name') && card.querySelector('.card-name').textContent) || '');
+  }
+  function teamExists(name){ return !!(window.allData && allData.equipos && allData.equipos[name] && allData.equipos[name].length); }
+  function reallyOpenTeam(name){
+    name = normalizeName(name);
+    if(!name) return false;
+    if(!teamExists(name)) return false;
+    try { window.openTeam(name, false); } catch(e) { console.error('openTeam failed:', e); }
+    var page = document.getElementById('detailPage');
+    if(page){
+      page.style.display = 'block';
+      page.style.visibility = 'visible';
+      page.style.opacity = '1';
+      page.style.zIndex = '999999';
+      page.scrollTop = 0;
+    }
+    if(location.hash !== '#' + encodeURIComponent(name)) {
+      try { history.pushState({team:name}, '', '#' + encodeURIComponent(name)); } catch(e) { location.hash = encodeURIComponent(name); }
+    }
+    return true;
+  }
+  function bindCards(){
+    document.querySelectorAll('.team-card').forEach(function(card){
+      var name = getTeamFromCard(card);
+      if(!name) return;
+      card.setAttribute('data-team', name);
+      card.style.cursor = 'pointer';
+      card.style.pointerEvents = 'auto';
+      card.style.position = card.style.position || 'relative';
+      card.style.zIndex = '50';
+      card.querySelectorAll('*').forEach(function(child){ child.style.pointerEvents = 'none'; });
+      card.onclick = function(ev){
+        ev.preventDefault();
+        ev.stopPropagation();
+        reallyOpenTeam(name);
+        return false;
+      };
+      card.onpointerup = function(ev){
+        ev.preventDefault();
+        ev.stopPropagation();
+        reallyOpenTeam(name);
+        return false;
+      };
+    });
+  }
+  document.addEventListener('click', function(ev){
+    var card = ev.target && ev.target.closest ? ev.target.closest('.team-card') : null;
+    if(!card) return;
+    var name = getTeamFromCard(card);
+    if(!name) return;
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+    reallyOpenTeam(name);
+  }, true);
+  document.addEventListener('pointerup', function(ev){
+    var card = ev.target && ev.target.closest ? ev.target.closest('.team-card') : null;
+    if(!card) return;
+    var name = getTeamFromCard(card);
+    if(!name) return;
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+    reallyOpenTeam(name);
+  }, true);
+  window.addEventListener('hashchange', function(){
+    var name = normalizeName(decodeURIComponent((location.hash || '').slice(1)));
+    if(teamExists(name)) reallyOpenTeam(name);
+  });
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindCards); else bindCards();
+  setTimeout(bindCards, 100);
+  setTimeout(bindCards, 500);
+  setTimeout(function(){
+    var name = normalizeName(decodeURIComponent((location.hash || '').slice(1)));
+    if(teamExists(name)) reallyOpenTeam(name);
+  }, 100);
+})();
+</script>
+
 </body>
 </html>
