@@ -317,6 +317,36 @@ footer{
   .rel-alto   {background:rgba(34,197,94,.15);color:#22c55e;border:1px solid rgba(34,197,94,.3);}
   .rel-inter  {background:rgba(234,179,8,.15);color:#eab308;border:1px solid rgba(234,179,8,.3);}
   .rel-bajo   {background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3);}
+
+  /* POINTS TABLE */
+  #pointsPage{display:none;padding:20px 28px;}
+  #pointsPage.visible{display:block;}
+  .pts-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--gold);margin-bottom:8px;}
+  .pts-chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+  .pts-chip-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2);white-space:nowrap;}
+  .pts-chip{background:var(--surface2);border:1px solid var(--border);color:var(--text2);font-size:11px;font-weight:600;font-family:'Barlow',sans-serif;padding:5px 12px;border-radius:20px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+  .pts-chip:hover{border-color:var(--gold);color:var(--gold);}
+  .pts-chip.active{background:var(--gold);border-color:var(--gold);color:#000;}
+  .pts-chip-div{width:1px;height:22px;background:var(--border);flex-shrink:0;}
+  .pts-tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow-x:auto;}
+  .pts-tbl{width:100%;border-collapse:collapse;table-layout:auto;}
+  .pts-tbl th{padding:12px 10px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--text2);background:var(--surface2);border-bottom:1px solid var(--border);cursor:pointer;white-space:normal;line-height:1.4;vertical-align:bottom;user-select:none;}
+  .pts-tbl th:hover{color:var(--gold);}
+  .pts-tbl th.pts-acol{color:var(--gold);}
+  .pts-tbl th.pts-thl{text-align:left;}
+  .pts-tbl td{padding:12px 10px;text-align:center;border-bottom:1px solid rgba(28,38,64,.4);font-family:'Bebas Neue',sans-serif;font-size:18px;vertical-align:middle;white-space:nowrap;}
+  .pts-tbl tbody tr:nth-child(odd){background:var(--surface);}
+  .pts-tbl tbody tr:nth-child(even){background:var(--surface2);}
+  .pts-tbl tbody tr:hover{background:rgba(201,162,39,.06);}
+  .pts-pos-num{font-family:'Bebas Neue',sans-serif;font-size:20px;}
+  .pts-gold{color:#c9a227;} .pts-silver{color:#94a3b8;} .pts-bronze{color:#cd7f32;}
+  .pts-flag-cell{padding:8px 6px !important;}
+  .pts-flag-img{width:44px;height:29px;border-radius:3px;overflow:hidden;border:1px solid rgba(255,255,255,.08);background:var(--surface2);display:flex;align-items:center;justify-content:center;margin:0 auto;}
+  .pts-flag-img img{width:100%;height:100%;object-fit:cover;display:block;}
+  .pts-name-td{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;text-align:left !important;white-space:nowrap;}
+  .pts-bar-td{padding:12px 8px !important;min-width:80px;}
+  .pts-bar-bg{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+  .pts-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold),#e8c84a);}
 </style>
 </head>
 <body>
@@ -755,10 +785,23 @@ footer{
 </main>
 
 <div id="pointsPage">
-  <div class="pts-header">
-    <div class="pts-title">Tabla de Puntos — Últimos 20 Partidos</div>
+  <div class="pts-title">Tabla de Puntos — Últimos 20 Partidos</div>
+  <div class="pts-chips">
+    <span class="pts-chip-lbl">Ordenar por</span>
+    <button class="pts-chip active" onclick="setPtsSort('pts',this)">Puntos</button>
+    <button class="pts-chip" onclick="setPtsSort('wins',this)">Victorias</button>
+    <button class="pts-chip" onclick="setPtsSort('draws',this)">Empates</button>
+    <button class="pts-chip" onclick="setPtsSort('losses',this)">Derrotas</button>
+    <div class="pts-chip-div"></div>
+    <button class="pts-chip" onclick="setPtsSort('rel_alta',this)">Relevancia ALTA</button>
+    <button class="pts-chip" onclick="setPtsSort('rel_inter',this)">Relevancia INTERMEDIA</button>
+    <button class="pts-chip" onclick="setPtsSort('rel_baja',this)">Relevancia BAJA</button>
+    <div class="pts-chip-div"></div>
+    <button class="pts-chip" onclick="setPtsSort('official',this)">Competición Oficial</button>
+    <button class="pts-chip" onclick="setPtsSort('friendly',this)">Amistosos</button>
+    <button class="pts-chip" onclick="setPtsSort('avg_rank',this)">Ranking Rivales</button>
   </div>
-  <div class="pts-table-wrap" id="ptsTableWrap"></div>
+  <div class="pts-tbl-wrap"><table class="pts-tbl" id="ptsTable"></table></div>
 </div>
 
 <footer>FIFA World Cup 2026 &nbsp;·&nbsp; Datos: ESPN &nbsp;·&nbsp; Solo partidos oficiales</footer>
@@ -1144,53 +1187,13 @@ function toggleSort() {
 const POINTS_DATA = [["Marruecos", 49, 79], ["España", 48, 31], ["Senegal", 47, 75], ["Inglaterra", 46, 65], ["Japón", 46, 65], ["Argentina", 45, 51], ["Costa de Marfil", 45, 83], ["Noruega", 45, 71], ["RD Congo", 44, 77], ["Argelia", 43, 94], ["Turquía", 42, 49], ["Alemania", 42, 41], ["Australia", 40, 73], ["Francia", 40, 36], ["Austria", 40, 78], ["Corea del Sur", 40, 69], ["Uzbekistán", 40, 75], ["Canadá", 40, 57], ["Portugal", 40, 37], ["Croacia", 39, 58], ["Países Bajos", 38, 60], ["Irán", 38, 81], ["México", 37, 44], ["Haití", 37, 104], ["Egipto", 37, 78], ["Panamá", 36, 81], ["Sudáfrica", 34, 90], ["República Checa", 34, 88], ["Irak", 34, 85], ["Brasil", 33, 29], ["Curazao", 33, 112], ["Suecia", 33, 64], ["Cabo Verde", 33, 96], ["Túnez", 33, 92], ["Estados Unidos", 32, 39], ["Nueva Zelanda", 32, 70], ["Ecuador", 31, 29], ["Suiza", 31, 42], ["Paraguay", 30, 26], ["Arabia Saudita", 30, 63], ["Jordania", 30, 73], ["Bélgica", 30, 60], ["Colombia", 29, 32], ["Escocia", 27, 57], ["Uruguay", 25, 38], ["Bosnia y Herzegovina", 24, 62], ["Ghana", 23, 83], ["Qatar", 20, 84]];
 const FLAG_CODES_MAP = {"Alemania": "de", "Arabia Saudita": "sa", "Argelia": "dz", "Argentina": "ar", "Australia": "au", "Austria": "at", "Bosnia y Herzegovina": "ba", "Brasil": "br", "B\u00e9lgica": "be", "Cabo Verde": "cv", "Canad\u00e1": "ca", "Colombia": "co", "Corea del Sur": "kr", "Costa de Marfil": "ci", "Croacia": "hr", "Curazao": "cw", "Ecuador": "ec", "Egipto": "eg", "Escocia": "gb-sct", "Espa\u00f1a": "es", "Estados Unidos": "us", "Francia": "fr", "Ghana": "gh", "Hait\u00ed": "ht", "Inglaterra": "gb-eng", "Irak": "iq", "Ir\u00e1n": "ir", "Jap\u00f3n": "jp", "Jordania": "jo", "Marruecos": "ma", "M\u00e9xico": "mx", "Noruega": "no", "Nueva Zelanda": "nz", "Panam\u00e1": "pa", "Paraguay": "py", "Pa\u00edses Bajos": "nl", "Portugal": "pt", "Qatar": "qa", "RD Congo": "cd", "Rep\u00fablica Checa": "cz", "Senegal": "sn", "Sud\u00e1frica": "za", "Suecia": "se", "Suiza": "ch", "Turqu\u00eda": "tr", "T\u00fanez": "tn", "Uruguay": "uy", "Uzbekist\u00e1n": "uz"};
 
-let ptsSortCol = 'pts'; // 'pts' or 'avg'
-let ptsSortAsc = false; // false = highest first
 
 function flagUrl2(name) {
   const code = FLAG_CODES_MAP[name];
   return code ? `https://flagcdn.com/w80/${code}.png` : '';
 }
 
-function renderPointsTable() {
-  const sorted = [...POINTS_DATA].sort((a,b) => {
-    const valA = ptsSortCol === 'pts' ? a[1] : (a[2] || 999);
-    const valB = ptsSortCol === 'pts' ? b[1] : (b[2] || 999);
-    return ptsSortAsc ? valA - valB : valB - valA;
-  });
-  const max = sorted[0][1];
-  let html = '';
-  // Header row
-  const ptsArrow = ptsSortCol==='pts' ? (ptsSortAsc?'↑':'↓') : '';
-  const avgArrow = ptsSortCol==='avg' ? (ptsSortAsc?'↑':'↓') : '';
-  html += `<div class="pts-row pts-header-row">
-    <div class="pts-pos" style="color:var(--text2);font-size:10px;font-family:'Barlow',sans-serif;font-weight:700;letter-spacing:1px">#</div>
-    <div class="pts-flag"></div>
-    <div class="pts-name" style="font-size:10px;color:var(--text2);font-weight:700;letter-spacing:1px;text-transform:uppercase">Selección</div>
-    <div class="pts-bar-wrap" style="font-size:10px;color:var(--text2);font-weight:700;letter-spacing:1px;text-transform:uppercase">Puntos</div>
-    <div class="pts-score pts-col-btn" onclick="sortPtsBy('pts')" style="font-size:10px;font-weight:700;letter-spacing:1px;font-family:'Barlow',sans-serif;text-transform:uppercase;cursor:pointer" title="Ordenar por puntos">PTS ${ptsArrow}</div>
-    <div class="pts-avg-col pts-col-btn" onclick="sortPtsBy('avg')" style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer" title="Ordenar por ranking de rivales">Promedio Ranking de Rivales ${avgArrow}</div>
-  </div>`;
-  sorted.forEach(([name, pts, avgRank], i) => {
-    const rank = ptsSortAsc ? POINTS_DATA.length - i : i + 1;
-    const flagUrl = flagUrl2(name);
-    const posClass = rank===1?'gold':rank===2?'silver':rank===3?'bronze':'';
-    const barW = Math.round((pts/max)*100);
-    const avgDisplay = avgRank ? `#${avgRank}` : '—';
-    html += `
-    <div class="pts-row">
-      <div class="pts-pos ${posClass}">${rank}</div>
-      <div class="pts-flag">${flagUrl ? `<img src="${flagUrl}" alt="${name}">` : '🏳'}</div>
-      <div class="pts-name">${name}</div>
-      <div class="pts-bar-wrap">
-        <div class="pts-bar-bg"><div class="pts-bar-fill" style="width:${barW}%"></div></div>
-      </div>
-      <div class="pts-score">${pts}</div>
-      <div class="pts-avg-col">${avgDisplay}</div>
-    </div>`;
-  });
-  document.getElementById('ptsTableWrap').innerHTML = html;
-}
+
 
 function sortPtsBy(col) {
   if(ptsSortCol === col) {
@@ -1216,6 +1219,78 @@ function switchTab(tab) {
     document.getElementById('pointsPage').classList.add('visible');
     renderPointsTable();
   }
+}
+
+
+// ── POINTS TABLE DATA ─────────────────────────────────────────────────────────
+const FLAG_PTS = {"Alemania": "de", "Arabia Saudita": "sa", "Argelia": "dz", "Argentina": "ar", "Australia": "au", "Austria": "at", "Bosnia y Herzegovina": "ba", "Brasil": "br", "B\u00e9lgica": "be", "Cabo Verde": "cv", "Canad\u00e1": "ca", "Colombia": "co", "Corea del Sur": "kr", "Costa de Marfil": "ci", "Croacia": "hr", "Curazao": "cw", "Ecuador": "ec", "Egipto": "eg", "Escocia": "gb-sct", "Espa\u00f1a": "es", "Estados Unidos": "us", "Francia": "fr", "Ghana": "gh", "Hait\u00ed": "ht", "Inglaterra": "gb-eng", "Irak": "iq", "Ir\u00e1n": "ir", "Jap\u00f3n": "jp", "Jordania": "jo", "Marruecos": "ma", "M\u00e9xico": "mx", "Noruega": "no", "Nueva Zelanda": "nz", "Panam\u00e1": "pa", "Paraguay": "py", "Pa\u00edses Bajos": "nl", "Portugal": "pt", "Qatar": "qa", "RD Congo": "cd", "Rep\u00fablica Checa": "cz", "Senegal": "sn", "Sud\u00e1frica": "za", "Suecia": "se", "Suiza": "ch", "Turqu\u00eda": "tr", "T\u00fanez": "tn", "Uruguay": "uy", "Uzbekist\u00e1n": "uz"};
+let ptsSortCol = 'pts', ptsSortAsc = false;
+
+function setPtsSort(col, btn) {
+  ptsSortCol === col ? (ptsSortAsc = !ptsSortAsc) : (ptsSortCol = col, ptsSortAsc = col === 'avg_rank');
+  document.querySelectorAll('.pts-chip').forEach(c => c.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderPointsTable();
+}
+
+function renderPointsTable() {
+  const names = Object.keys(ENRICHED_DATA);
+  const sorted = [...names].sort((a,b) => {
+    const va = ENRICHED_DATA[a][ptsSortCol] ?? (ptsSortAsc ? 9999 : -1);
+    const vb = ENRICHED_DATA[b][ptsSortCol] ?? (ptsSortAsc ? 9999 : -1);
+    return ptsSortAsc ? va-vb : vb-va;
+  });
+  const maxPts = Math.max(...names.map(n => ENRICHED_DATA[n].pts));
+  const arrow = ptsSortAsc ? ' ↑' : ' ↓';
+  const ac = col => ptsSortCol === col ? ' pts-acol' : '';
+
+  const cols = [
+    {key:'pts',      label:'PTS',                  w:'55px',   color:''},
+    {key:'avg_rank', label:'Ranking<br>Rivales',    w:'100px',  color:''},
+    {key:'wins',     label:'Victorias',             w:'90px',   color:'#22c55e'},
+    {key:'draws',    label:'Empates',               w:'90px',   color:'#eab308'},
+    {key:'losses',   label:'Derrotas',              w:'90px',   color:'#ef4444'},
+    {key:'rel_alta', label:'Relevancia<br>ALTA',    w:'100px',  color:'#22c55e'},
+    {key:'rel_inter',label:'Relevancia<br>INTERMEDIA',w:'130px',color:'#eab308'},
+    {key:'rel_baja', label:'Relevancia<br>BAJA',    w:'100px',  color:'#ef4444'},
+    {key:'official', label:'Comp.<br>Oficial',      w:'110px',  color:''},
+    {key:'friendly', label:'Amistosos',             w:'100px',  color:''},
+  ];
+
+  let thead = '<thead><tr><th style="min-width:44px">#</th><th style="min-width:50px"></th><th class="pts-thl" style="min-width:130px">Selección</th><th style="min-width:90px">Puntos</th>';
+  cols.forEach(c => {
+    const colorStyle = c.color ? `color:${c.color};` : '';
+    thead += `<th class="${ac(c.key)}" onclick="setPtsSort('${c.key}',this)" style="${colorStyle}min-width:${c.w}">${c.label}${ptsSortCol===c.key?arrow:''}</th>`;
+  });
+  thead += '</tr></thead>';
+
+  let tbody = '<tbody>';
+  sorted.forEach((name, i) => {
+    const d = ENRICHED_DATA[name];
+    const rank = i+1;
+    const pc = rank===1?'pts-gold':rank===2?'pts-silver':rank===3?'pts-bronze':'';
+    const code = FLAG_PTS[name] || '';
+    const flag = code ? `<img src="https://flagcdn.com/w80/${code}.png" alt="${name}">` : '🏳';
+    const barW = Math.round((d.pts/maxPts)*100);
+    tbody += `<tr>
+      <td class="pts-pos-num ${pc}">${rank}</td>
+      <td class="pts-flag-cell"><div class="pts-flag-img">${flag}</div></td>
+      <td class="pts-name-td">${name}</td>
+      <td class="pts-bar-td"><div class="pts-bar-bg"><div class="pts-bar-fill" style="width:${barW}%"></div></div></td>
+      <td style="${ptsSortCol==='pts'?'color:var(--gold)':''}">${d.pts}</td>
+      <td style="${ptsSortCol==='avg_rank'?'color:var(--gold)':''}">${d.avg_rank?'#'+d.avg_rank:'—'}</td>
+      <td style="color:#22c55e${ptsSortCol==='wins'?';font-size:22px':''}">${d.wins}</td>
+      <td style="color:#eab308${ptsSortCol==='draws'?';font-size:22px':''}">${d.draws}</td>
+      <td style="color:#ef4444${ptsSortCol==='losses'?';font-size:22px':''}">${d.losses}</td>
+      <td style="color:#22c55e${ptsSortCol==='rel_alta'?';font-size:22px':''}">${d.rel_alta}</td>
+      <td style="color:#eab308${ptsSortCol==='rel_inter'?';font-size:22px':''}">${d.rel_inter}</td>
+      <td style="color:#ef4444${ptsSortCol==='rel_baja'?';font-size:22px':''}">${d.rel_baja}</td>
+      <td style="${ptsSortCol==='official'?'color:var(--gold)':''}">${d.official}</td>
+      <td style="${ptsSortCol==='friendly'?'color:var(--gold)':''}">${d.friendly}</td>
+    </tr>`;
+  });
+  tbody += '</tbody>';
+  document.getElementById('ptsTable').innerHTML = thead + tbody;
 }
 
 loadData();
