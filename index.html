@@ -987,11 +987,14 @@ function getResultClass(res, teamName, homeTeam) {
 }
 
 function openTeam(teamName) {
+  console.log('openTeam called:', teamName);
   if(!allData) allData = EMBEDDED_WC_DATA;
+  console.log('allData ok, equipos keys:', Object.keys(allData.equipos||{}).length);
   currentTeam = teamName;
-  sortAsc = false; // reset to newest first on open
+  sortAsc = false;
   const teams = allData.equipos || {};
   const matches = teams[teamName] || [];
+  console.log('matches found:', matches.length);
   if(!matches.length) { console.warn('No matches found for team:', teamName); return; }
 
   const m0 = matches[0];
@@ -1074,8 +1077,11 @@ function openTeam(teamName) {
   renderTable(teamName, matches);
 
   // Show overlay
+  console.log('Setting detailPage display to block');
   const page = document.getElementById('detailPage');
+  console.log('detailPage element:', page ? 'found' : 'NOT FOUND');
   page.style.display = 'block';
+  console.log('display set, current value:', page.style.display);
   page.scrollTop = 0;
 
   // Update URL hash
