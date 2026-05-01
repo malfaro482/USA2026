@@ -337,6 +337,28 @@ footer{
   .ptst-bar{min-width:70px;}
   .ptst-bar-bg{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
   .ptst-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold),#e8c84a);}
+
+/* FIX: full-width points table so every column is visible on the page */
+main{max-width:100%;width:100%;}
+#pointsPage{max-width:none !important;width:100% !important;margin:0 !important;padding:28px 24px !important;}
+.pts-table-wrap{width:100% !important;overflow:visible !important;}
+.ptst{width:100% !important;table-layout:fixed !important;border-collapse:collapse;}
+.ptst th{padding:9px 4px !important;font-family:'Barlow Condensed',sans-serif !important;font-size:clamp(7px,0.62vw,10px) !important;line-height:1.05 !important;letter-spacing:.45px !important;white-space:normal !important;}
+.ptst td{padding:8px 4px !important;font-family:'Barlow Condensed',sans-serif !important;font-size:clamp(11px,1vw,18px) !important;line-height:1.1 !important;}
+.ptst th:nth-child(1), .ptst td:nth-child(1){width:3%;}
+.ptst th:nth-child(2), .ptst td:nth-child(2){width:4%;}
+.ptst th:nth-child(3), .ptst td:nth-child(3){width:12%;}
+.ptst th:nth-child(4), .ptst td:nth-child(4){width:9%;}
+.ptst th:nth-child(5), .ptst td:nth-child(5){width:4%;}
+.ptst th:nth-child(6), .ptst td:nth-child(6){width:7%;}
+.ptst th:nth-child(n+7), .ptst td:nth-child(n+7){width:6.1%;}
+.ptst-name{font-family:'Barlow Condensed',sans-serif !important;font-size:clamp(10px,.9vw,14px) !important;font-weight:700 !important;text-transform:none !important;white-space:normal !important;line-height:1.05 !important;}
+.ptst-flag{width:34px !important;height:23px !important;}
+.ptst-bar{min-width:0 !important;}
+.pts-header{max-width:none !important;}
+.pts-title{font-size:clamp(20px,1.8vw,28px) !important;}
+@media(max-width:900px){#pointsPage{padding:20px 8px !important;}.ptst th{font-size:6.5px !important;letter-spacing:.2px !important;padding:6px 2px !important;}.ptst td{font-size:10px !important;padding:6px 2px !important;}.ptst-flag{width:26px !important;height:18px !important;}}
+
 </style>
 </head>
 <body>
@@ -1184,6 +1206,8 @@ const FLAG_CODES_MAP = {"Alemania": "de", "Arabia Saudita": "sa", "Argelia": "dz
 let ptsSortCol = 'pts'; // 'pts' or 'avg'
 let ptsSortAsc = false; // false = highest first
 
+function cleanTeamName(name) { return String(name || "").replace(/\s*\([^)]*\)\s* g, "").trim(); }
+
 function flagUrl2(name) {
   const code = FLAG_CODES_MAP[name];
   return code ? `https://flagcdn.com/w80/${code}.png` : '';
@@ -1236,7 +1260,7 @@ function renderPointsTable() {
     t += `<tr>
       <td class="pts-pos ${pc}">${rank}</td>
       <td style="padding:6px 8px"><div class="ptst-flag">${flag}</div></td>
-      <td class="ptst-name">${name}</td>
+      <td class="ptst-name">${cleanTeamName(name)}</td>
       <td class="ptst-bar"><div class="ptst-bar-bg"><div class="ptst-bar-fill" style="width:${barW}%"></div></div></td>
       <td style="${hl('pts')}">${pts}</td>
       <td style="${hl('avg')}">${avg?'#'+avg:'—'}</td>
